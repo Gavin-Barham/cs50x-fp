@@ -124,3 +124,13 @@ def register():
 
     # Redirect user to login page
     return redirect("/login")
+
+@app.route("/employee", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    return render_template("employee.html")
+
+@app.route("/history", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    return render_template("history.html")
