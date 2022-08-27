@@ -126,11 +126,11 @@ def register():
     return redirect("/login")
 
 @app.route("/employee", methods=["GET", "POST"])
-def register():
-    """Register user"""
+def employee():
+    """add or remove employee from database"""
     return render_template("employee.html")
 
 @app.route("/history", methods=["GET", "POST"])
-def register():
-    """Register user"""
+def history():
+    """shows table of dilivery history filterable by time passed"""
     return render_template("history.html")
