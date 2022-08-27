@@ -11,6 +11,7 @@ from helpers import apology, login_required, lookup, usd
 
 # Configure application
 app = Flask(__name__)
+
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -43,7 +44,8 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-
+    """Show portfolio of stocks"""
+    # todo
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -90,3 +92,34 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    if not request.method == "POST":
+        return render_template("register.html")
+
+        #  Ensure username was submitted
+    if not request.form.get("username"):
+        return apology("must provide username", 400)
+
+      # Ensure password was submitted
+    elif not request.form.get("password"):
+        return apology("must provide password", 400)
+
+    elif not request.form.get("confirmation"):
+        return apology("must confirm password", 400)
+
+    if db.execute("SELECT username FROM users WHERE username = ?", request.form.get("username").upper()):
+        return apology("username already exists", 400)
+
+    if request.form.get("confirmation") == request.form.get("password"):
+        # Query database for username
+        db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", request.form.get(
+            "username").upper(), generate_password_hash(request.form.get("password")))
+    else:
+        return apology("passwords do not match")
+
+    # Redirect user to login page
+    return redirect("/login")
