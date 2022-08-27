@@ -128,19 +128,10 @@ def register():
 @app.route("/employee", methods=["GET", "POST"])
 def employee():
     """add or remove employee from database"""
-
-                '''TODO'''
-
-    if not request.method == "POST":
-        return render_template("employee.html")
-    else:
-    return redirect("assign.html")
+    return render_template("employee.html")
 
 
 @app.route("/history", methods=["GET", "POST"])
 def history():
     """shows table of dilivery history filterable by time passed"""
-
-                        '''TODO'''
-                        
     return render_template("history.html")
