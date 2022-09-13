@@ -125,11 +125,15 @@ def register():
     # Redirect user to login page
     return redirect("/login")
 
+@app.route("/stores", methods=["GET", "POST"])
+def stores():
+    """add or remove employee from database"""
+    return render_template("stores.html")
+
 @app.route("/employee", methods=["GET", "POST"])
 def employee():
     """add or remove employee from database"""
     return render_template("employee.html")
-
 
 @app.route("/history", methods=["GET", "POST"])
 def history():
