@@ -101,24 +101,29 @@ def register():
     if not request.method == "POST":
         return render_template("register.html")
 
-        #  Ensure username was submitted
+    #  Ensure username was submitted
     if not request.form.get("username"):
         return apology("must provide username", 400)
 
-      # Ensure password was submitted
+    # Ensure password was submit
     elif not request.form.get("password"):
         return apology("must provide password", 400)
 
+    # Ensure confirmation password was submit
     elif not request.form.get("confirmation"):
         return apology("must confirm password", 400)
 
+    # Ensure username doesnt already exist in DB
     if db.execute("SELECT username FROM users WHERE username = ?", request.form.get("username").upper()):
         return apology("username already exists", 400)
 
+    # Ensure password and confirmation password match
     if request.form.get("confirmation") == request.form.get("password"):
+
         # Query database for username
         db.execute("INSERT INTO users (id, username, hash) VALUES (?, ?, ?)", id(request.form.get("username")), request.form.get(
             "username").upper(), generate_password_hash(request.form.get("password")))
+
     else:
         return apology("passwords do not match")
 
@@ -127,6 +132,12 @@ def register():
 
 @app.route("/stores", methods=["GET", "POST"])
 def stores():
+
+    if not request.method == "POST":
+        return render_template("stores.html")
+    
+    store_id = request.form.get("store_number")
+
     """add or remove employee from database"""
     return render_template("stores.html")
 
