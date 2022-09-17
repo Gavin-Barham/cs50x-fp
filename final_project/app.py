@@ -32,6 +32,7 @@ if not os.environ.get("API_KEY"):
 
 current_time = datetime.datetime.now()
 
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -46,6 +47,7 @@ def after_request(response):
 def index():
     """Show portfolio of stocks"""
     return render_template("index.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -67,7 +69,6 @@ def login():
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username").upper())
-        print(rows)
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
@@ -120,7 +121,7 @@ def register():
     # Ensure password and confirmation password match
     if request.form.get("confirmation") == request.form.get("password"):
 
-        # Query database for username
+        # Insert new row into users table containing the filled forms data
         db.execute("INSERT INTO users (id, username, hash) VALUES (?, ?, ?)", id(request.form.get("username")), request.form.get(
             "username").upper(), generate_password_hash(request.form.get("password")))
 
@@ -130,21 +131,47 @@ def register():
     # Redirect user to login page
     return redirect("/login")
 
-@app.route("/stores", methods=["GET", "POST"])
-def stores():
 
-    if not request.method == "POST":
-        return render_template("stores.html")
+# @app.route("/stores", methods=["GET", "POST"])
+# def stores():
+#     """change current store_id"""
+
+#     # Create a "stores" variable to hold any store_id associated to user
+#     stores = db.execute("SELECT UNIQUE store_id FROM stores st JOIN users usr ON st.store_id = usr.store_id WHERE user_id = ?", session["user_id"])
+
+#     # Ensure "stores" variable is not empty
+#     if len(stores) <= 0:
+#         return redirect("/select_your_store")
+
+#     if not request.method == "POST":
+#         return render_template("stores.html", stores=stores)
+
+#     # Set selected store_id as session variable
+#     session["current_store_id"] = request.form.get("store_id")
+
+
+# @app.route("/select_your_stores", methods=["GET", "POST"])
+# def select_your_store():
+#     """select the store/s to which the user is employed"""
+
+#     # Create a "stores" variable to hold all available store_id for the user to select from
+#     stores = db.execute("SELECT UNIQUE store_id FROM stores")
+#     if request.method == "GET":
+#         return render_template("select_your_store.html", stores=stores)
+
+#     if not request.form.get("store_id"):
+#         return apology("Please select a store number" 400)
     
-    store_id = request.form.get("store_number")
+#     # Update users table with new store_id
+#     db.execute("INSERT INTO users (store_id) VALUE (?) WHERE user_id = ?", session["store_id"], session["user_id"])
+#     return redirect("/stores")
 
-    """add or remove employee from database"""
-    return render_template("stores.html")
 
 @app.route("/employee", methods=["GET", "POST"])
 def employee():
     """add or remove employee from database"""
     return render_template("employee.html")
+
 
 @app.route("/history", methods=["GET", "POST"])
 def history():
