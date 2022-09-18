@@ -148,7 +148,7 @@ def stores():
 
     # Set selected store_id as session variable
     if not request.method == "POST":
-    session["current_store_id"] = request.form.get("store_id")
+        session["current_store_id"] = request.form.get("store_id")
 
 
 @app.route("/select_your_stores", methods=["GET", "POST"])
@@ -177,22 +177,22 @@ def select_your_store():
 def admin():
     """verify admin privileges via store password and updates user table with admin credentials"""
     
-if request.method == "POST":
-    return render_template("admin.html")
-
-# Store the store admin password to check agains users typed passcode
-password = db.execute("SELECT admin_password FROM stores WHERE store_id = ?")
-
-if request.form.get("password") != password:
-    return apology("passwords does not match", 400)
-
-# If typed password matches store_password 
-if request.form.get("password") == password
-
-    # Update admin row on users table to give user admin priveleges
-    db.execute("UPDATE users (admin) VALUE(True) WHERE user_id = ?", session["user_id"])
-
-    return redirect("/employee")
+    if request.method == "POST":
+        return render_template("admin.html")
+    
+    # Store the store admin password to check agains users typed passcode
+    password = db.execute("SELECT admin_password FROM stores WHERE store_id = ?")
+    
+    if request.form.get("password") != password:
+        return apology("passwords does not match", 400)
+    
+    # If typed password matches store_password 
+    if request.form.get("password") == password:
+    
+        # Update admin row on users table to give user admin priveleges
+        db.execute("UPDATE users (admin) VALUE(True) WHERE user_id = ?", session["user_id"])
+    
+        return redirect("/employee")
 
     
 
@@ -206,6 +206,7 @@ def employee():
     if request.method == "POST":
         return render_template("employee.html", employees=employees)
 
+    request.form.get("employee")
 
 
 @app.route("/history", methods=["GET", "POST"])
