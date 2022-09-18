@@ -143,10 +143,11 @@ def stores():
     if len(stores) <= 0:
         return redirect("/select_your_store")
 
-    if not request.method == "POST":
+    if request.method == "POST":
         return render_template("stores.html", stores=stores)
 
     # Set selected store_id as session variable
+    if not request.method == "POST":
     session["current_store_id"] = request.form.get("store_id")
 
 
@@ -180,9 +181,20 @@ if request.method == "POST":
     return render_template("admin.html")
 
 # Store the store admin password to check agains users typed passcode
-passcode = db.execute("SELECT admin_password FROM stores WHERE store_id = ?")
+password = db.execute("SELECT admin_password FROM stores WHERE store_id = ?")
 
-if request.form.get("password") == passcode
+if request.form.get("password") != password:
+    return apology("passwords does not match", 400)
+
+# If typed password matches store_password 
+if request.form.get("password") == password
+
+    # Update admin row on users table to give user admin priveleges
+    db.execute("UPDATE users (admin) VALUE(True) WHERE user_id = ?", session["user_id"])
+
+    return redirect("/employee")
+
+    
 
 @app.route("/employee", methods=["GET", "POST"])
 def employee():
@@ -191,7 +203,7 @@ def employee():
     # Store a list of all drivers for the assoiciated store_id
     employees = db.execute("SELECT name FROM drivers dr JOIN stores st ON dr.store_id = st.store_id WHERE store_id = ?", session["store_id"])
 
-    if request.method == "POST"
+    if request.method == "POST":
         return render_template("employee.html", employees=employees)
 
 
