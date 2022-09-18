@@ -45,7 +45,7 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    """Show portfolio of stocks"""
+    """assign driver to group of addresses with associated order number"""
     return render_template("index.html")
 
 
@@ -78,7 +78,7 @@ def login():
         session["user_id"] = rows[0]["id"]
 
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/stores")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -132,45 +132,68 @@ def register():
     return redirect("/login")
 
 
-# @app.route("/stores", methods=["GET", "POST"])
-# def stores():
-#     """change current store_id"""
+@app.route("/stores", methods=["GET", "POST"])
+def stores():
+    """change current store_id"""
 
-#     # Create a "stores" variable to hold any store_id associated to user
-#     stores = db.execute("SELECT UNIQUE store_id FROM stores st JOIN users usr ON st.store_id = usr.store_id WHERE user_id = ?", session["user_id"])
+    # Create a "stores" variable to hold any store_id associated to user
+    stores = db.execute("SELECT UNIQUE store_id FROM stores st JOIN users usr ON st.store_id = usr.store_id WHERE user_id = ?", session["user_id"])
 
-#     # Ensure "stores" variable is not empty
-#     if len(stores) <= 0:
-#         return redirect("/select_your_store")
+    # Ensure "stores" variable is not empty
+    if len(stores) <= 0:
+        return redirect("/select_your_store")
 
-#     if not request.method == "POST":
-#         return render_template("stores.html", stores=stores)
+    if not request.method == "POST":
+        return render_template("stores.html", stores=stores)
 
-#     # Set selected store_id as session variable
-#     session["current_store_id"] = request.form.get("store_id")
+    # Set selected store_id as session variable
+    session["current_store_id"] = request.form.get("store_id")
 
 
-# @app.route("/select_your_stores", methods=["GET", "POST"])
-# def select_your_store():
-#     """select the store/s to which the user is employed"""
+@app.route("/select_your_stores", methods=["GET", "POST"])
+def select_your_store():
+    """select the store/s to which the user is employed"""
 
-#     # Create a "stores" variable to hold all available store_id for the user to select from
-#     stores = db.execute("SELECT UNIQUE store_id FROM stores")
-#     if request.method == "GET":
-#         return render_template("select_your_store.html", stores=stores)
+    # Create a "stores" variable to hold all available store_id for the user to select from
+    stores = db.execute("SELECT UNIQUE store_id FROM stores")
+    if request.method == "GET":
+        return render_template("select_your_store.html", stores=stores)
 
-#     if not request.form.get("store_id"):
-#         return apology("Please select a store number" 400)
+    if not request.form.get("store_id"):
+        return apology("Please select a store number", 400)
     
-#     # Update users table with new store_id
-#     db.execute("INSERT INTO users (store_id) VALUE (?) WHERE user_id = ?", session["store_id"], session["user_id"])
-#     return redirect("/stores")
+    # Update users table with new store_id
+    db.execute("INSERT INTO users (store_id) VALUE (?) WHERE user_id = ?", session["store_id"], session["user_id"])
 
+    # If admin box checked prompt for passcode
+    if request.form.get("admin") == True:
+        return redirect("/admin")
+
+    return redirect("/stores")
+
+
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+    """verify admin privileges via store password and updates user table with admin credentials"""
+    
+if request.method == "POST":
+    return render_template("admin.html")
+
+# Store the store admin password to check agains users typed passcode
+passcode = db.execute("SELECT admin_password FROM stores WHERE store_id = ?")
+
+if request.form.get("password") == passcode
 
 @app.route("/employee", methods=["GET", "POST"])
 def employee():
     """add or remove employee from database"""
-    return render_template("employee.html")
+
+    # Store a list of all drivers for the assoiciated store_id
+    employees = db.execute("SELECT name FROM drivers dr JOIN stores st ON dr.store_id = st.store_id WHERE store_id = ?", session["store_id"])
+
+    if request.method == "POST"
+        return render_template("employee.html", employees=employees)
+
 
 
 @app.route("/history", methods=["GET", "POST"])
