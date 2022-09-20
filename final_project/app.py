@@ -133,38 +133,50 @@ def register():
 
 
 @app.route("/stores", methods=["GET", "POST"])
+@login_required
 def stores():
     """change current store_id"""
 
     # Create a "stores" variable to hold any store_id associated to user
-    stores = db.execute("SELECT UNIQUE store_id FROM stores st JOIN users usr ON st.store_id = usr.store_id WHERE user_id = ?", session["user_id"])
+    stores = db.execute("SELECT DISTINCT st.store_id FROM stores st JOIN employees emp ON st.store_id = emp.store_id WHERE id = ?", session["user_id"])
 
     # Ensure "stores" variable is not empty
     if len(stores) <= 0:
-        return redirect("/select_your_store")
+        return redirect("/select_your_stores")
 
-    if request.method == "POST":
+    # Load stores page
+    if not request.method == "POST":
         return render_template("stores.html", stores=stores)
 
-    # Set selected store_id as session variable
-    if not request.method == "POST":
+    # When form submit
+    if request.method == "POST":
+
+        # Set selected store_id as session variable
+        if not request.form.get("current_store"):
+            return apology("must select your store number", 400)
+    
+        # Set session[current_store_id] as selected store and redirect to homepage
         session["current_store_id"] = request.form.get("store_id")
+        return redirect("/")
 
 
 @app.route("/select_your_stores", methods=["GET", "POST"])
-def select_your_store():
+@login_required
+def select_your_stores():
     """select the store/s to which the user is employed"""
 
     # Create a "stores" variable to hold all available store_id for the user to select from
-    stores = db.execute("SELECT UNIQUE store_id FROM stores")
-    if request.method == "GET":
-        return render_template("select_your_store.html", stores=stores)
+    stores = db.execute("SELECT DISTINCT store_id FROM stores")
+    if not request.method == "POST":
+        return render_template("select_your_stores.html", stores=stores)
 
-    if not request.form.get("store_id"):
+    if not request.form.get("store"):
         return apology("Please select a store number", 400)
     
     # Update users table with new store_id
-    db.execute("INSERT INTO users (store_id) VALUE (?) WHERE user_id = ?", session["store_id"], session["user_id"])
+    store = request.form.get("store")
+    print(store)
+    db.execute("INSERT INTO employees (id, store_id) VALUES (?, ?)", session["user_id"], store)
 
     # If admin box checked prompt for passcode
     if request.form.get("admin") == True:
@@ -174,6 +186,7 @@ def select_your_store():
 
 
 @app.route("/admin", methods=["GET", "POST"])
+@login_required
 def admin():
     """verify admin privileges via store password and updates user table with admin credentials"""
     
@@ -181,35 +194,36 @@ def admin():
         return render_template("admin.html")
     
     # Store the store admin password to check agains users typed passcode
-    password = db.execute("SELECT admin_password FROM stores WHERE store_id = ?")
+    password = db.execute("SELECT admin_passcode FROM stores WHERE store_id = ?")
     
     if request.form.get("password") != password:
-        return apology("passwords does not match", 400)
+        return apology("passwords do not match", 400)
     
     # If typed password matches store_password 
     if request.form.get("password") == password:
     
         # Update admin row on users table to give user admin priveleges
-        db.execute("UPDATE users (admin) VALUE(True) WHERE user_id = ?", session["user_id"])
+        db.execute("UPDATE employees (admin) VALUES (True) WHERE user_id = ?", session["user_id"])
     
-        return redirect("/employee")
+        return redirect("/employees")
 
     
 
-@app.route("/employee", methods=["GET", "POST"])
-def employee():
+@app.route("/employees", methods=["GET", "POST"])
+@login_required
+def employees():
     """add or remove employee from database"""
 
     # Store a list of all drivers for the assoiciated store_id
-    employees = db.execute("SELECT name FROM drivers dr JOIN stores st ON dr.store_id = st.store_id WHERE store_id = ?", session["store_id"])
+    drivers = db.execute("SELECT name FROM drivers dr JOIN stores st ON dr.store_id = st.store_id WHERE store_id = ?", session["store_id"])
 
-    if request.method == "POST":
-        return render_template("employee.html", employees=employees)
+    if not request.method == "POST":
+        return render_template("employees.html", drivers=drivers)
 
-    request.form.get("employee")
 
 
 @app.route("/history", methods=["GET", "POST"])
+@login_required
 def history():
     """shows table of dilivery history filterable by time passed"""
     return render_template("history.html")
