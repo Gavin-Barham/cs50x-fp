@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Select Your Stores
+{% endblock %}
+
+{% block main %}
+<form action="/select_your_stores" method="post">
+    <div class="mb-3">
+        <select class="form-select mx-auto w-auto" name="store">
+            <option disabled="" selected="">Stores</option>
+
+                {% for rows in stores %}
+                <option value="{{ rows.store_id }}">{{ rows.store_id }}</option>
+                {% endfor %}
+
+        </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Select</button>
+</form>
+
+{% endblock %}
