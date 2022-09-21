@@ -1,6 +1,5 @@
 import os
 import datetime
-from pickle import APPEND
 
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for
@@ -176,19 +175,11 @@ def select_your_stores():
     
     # Update users table with new store_id
     store = request.form.get("store")
-<<<<<<< HEAD
-    print(store)
-    db.execute("INSERT INTO employees (id, store_id) VALUES (?, ?)", session["user_id"], store)
-
-    # If admin box checked prompt for passcode
-    if request.form.get("admin") == True:
-=======
     session["current_store_id"] = store
     db.execute("INSERT INTO employees (id, store_id) VALUES (?, ?)", session["user_id"], store)
 
     # If admin box checked prompt for passcode
     if request.form.get("admin") == "True":
->>>>>>> test
         return redirect("/admin")
 
     return redirect("/stores")
@@ -198,25 +189,6 @@ def select_your_stores():
 @login_required
 def admin():
     """verify admin privileges via store password and updates user table with admin credentials"""
-<<<<<<< HEAD
-    
-    if request.method == "POST":
-        return render_template("admin.html")
-    
-    # Store the store admin password to check agains users typed passcode
-    password = db.execute("SELECT admin_passcode FROM stores WHERE store_id = ?")
-    
-    if request.form.get("password") != password:
-        return apology("passwords do not match", 400)
-    
-    # If typed password matches store_password 
-    if request.form.get("password") == password:
-    
-        # Update admin row on users table to give user admin priveleges
-        db.execute("UPDATE employees (admin) VALUES (True) WHERE user_id = ?", session["user_id"])
-    
-        return redirect("/employees")
-=======
 
     # Store the store admin password to check agains users typed passcode
     password = db.execute("SELECT admin_passcode FROM stores WHERE store_id = ?", session["current_store_id"])
@@ -242,7 +214,6 @@ def admin():
             # Update admin row on users table to give user admin priveleges and redirect to index
             db.execute("UPDATE employees SET admin = ? WHERE id = ? AND store_id = ?", "True", session["user_id"], session["current_store_id"])
             return redirect("/stores")
->>>>>>> test
 
     
 
@@ -252,11 +223,7 @@ def employees():
     """add or remove employee from database"""
 
     # Store a list of all drivers for the assoiciated store_id
-<<<<<<< HEAD
-    drivers = db.execute("SELECT name FROM drivers dr JOIN stores st ON dr.store_id = st.store_id WHERE store_id = ?", session["store_id"])
-=======
     drivers = db.execute("SELECT name FROM drivers dr JOIN stores st ON dr.store_id = st.store_id WHERE store_id = ?", session["current_store_id"])
->>>>>>> test
 
     if not request.method == "POST":
         return render_template("employees.html", drivers=drivers)
