@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Employees List
+{% endblock %}
+
+{% block main %}
+<form action="/drivers" method="post">
+    <main class="container py-5 text-center">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-start">ID</th>
+                    <th class="text-start">Name</th>
+                    <th class="text-end">Store #</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for driver in drivers %}
+                <tr>
+                    <td class="text-start">{{ driver.driver_id }}</td>
+                    <td class="text-start">{{ driver.name }}</td>
+                    <td class="text-end">{{ driver.store_id }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+    </main>
+    <div class="mb-3">
+        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="name" name="name" placeholder="Name" type="text">
+    </div>
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="id" name="id" placeholder="id" type="text">
+        </div>
+    <button class="btn btn-primary" name="app_driver" value="add" type="submit">Add Driver</button>
+    <button class="btn btn-secondary" name="app_driver" value="remove" type="submit">Remove Driver</button>
+</form>
+
+{% endblock %}

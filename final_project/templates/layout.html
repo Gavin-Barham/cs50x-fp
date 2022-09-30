@@ -24,19 +24,20 @@
 
         <nav class="bg-light border navbar navbar-expand-md navbar-light">
             <div class="container-fluid">
-                <a class="navbar-brand" href="/"><span class="blue">DE</span><span class="red">LI</span><span class="yellow">VE</span><span class="green">RY</span> <span class="red">Freaky Fast </span></a>
+                <a class="navbar-brand" href="/"><span class="red">DE</span><span class="red">LI</span><span class="black">VE</span><span class="black">RY</span><span class="red">Freaky</span><span class="black">Fast</span></a>
                 <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbar">
                     {% if session["user_id"] %}
                         <ul class="navbar-nav me-auto mt-2">
-                            <li class="nav-item"><a class="nav-link" href="/employee">Employee List</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/stores">Stores</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/select_your_stores">Select Stores</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/drivers">Driver List</a></li>
+                         
                             <li class="nav-item"><a class="nav-link" href="/history">History</a></li>
                         </ul>
                         <ul class="navbar-nav ms-auto mt-2">
+                            <li class="nav-item"><a class="nav-link" href="/stores">Current Store</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/select_your_stores">Choose Your Stores</a></li>
                             <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                         </ul>
 

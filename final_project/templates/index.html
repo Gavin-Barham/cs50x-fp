@@ -5,27 +5,73 @@
 {% endblock %}
 
 {% block main %}
-<form action="/buy" method="post">
+<form action="/" method="post">
     <main class="container py-5 text-center">
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th class="text-start">Driver</th>
                     <th class="text-start">Address</th>
-                    <th class="text-end">Order #</th>
+                    <th class="text-end">Order Number</th>
                 </tr>
             </thead>
             <tbody>
-                {% for name in employees %}
+                {% for row in active_drivers %}
                 <tr>
-                <td class="text-start">{{ name.name }}</td>
-                <td class="text-start">{{ name.name }}</td>
+                <td class="text-start">{{ row.name }}</td>
+                <td class="text-start">{{ row.store_id }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
             </tfoot>
         </table>
+        <div class="mb-3">
+            <select class="form-select mx-auto w-auto" name="driver">
+                <option disabled="" selected="">Drivers</option>
+    
+                    {% for row in drivers %}
+                    <option value="{{ row.name }}">{{ row.name }}</option>
+                    {% endfor %}
+                    {% for rows in orders %}
+                    <option value="{{ row.name }}">{{ row.name }}</option>
+                    <option value="{{ row.order_number }}">{{ row.order_number }}</option>
+                    {% endfor %}
+    
+            </select>
+            <p> </p>
+            <button class="btn btn-primary" name=activate value="add" type="submit">Add Driver</button>
+            <button class="btn btn-secondary" name=activate value="remove" type="submit">Remove Driver</button>    
+            <div class="container">
+                <div class="row">
+                    <div>
+                        <p> </p>
+                        <div class="form-group">
+                            <input id="address" placeholder="Address" type="text"></input>
+                            <input id="order_num" placeholder="Order Number" type="number" min="1"></input>
+                            <p> </p>
+                            <button class="btn btn-primary" name=address_append value="append" type="submit">Add Address/Order #</button>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" name=assign value="assign" type="submit">Assign Orders</button> 
+        
+ 
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNgpkzEyuqSt0eWFsMrqgSHzN8nBh2oyQ&libraries=places&callback=initMap"></script>
+    </script>
+    
+    <script>// Create autocomplete
+
+        autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')), {
+            types: ['address'],
+            
+        });
+    </script>
+    
+
     </main>
 </form>
 

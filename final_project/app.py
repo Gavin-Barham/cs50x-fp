@@ -1,3 +1,4 @@
+from audioop import add
 import os
 import datetime
 from pickle import APPEND
@@ -8,8 +9,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required
-
+from helpers import apology, login_required, store_required
 # Configure application
 app = Flask(__name__)
 
@@ -43,11 +43,41 @@ def after_request(response):
     return response
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
+@store_required
 def index():
     """assign driver to group of addresses with associated order number"""
-    return render_template("index.html")
+
+    # Store a list of active drivers for the assoiciated store_id
+    active_drivers = db.execute("SELECT name FROM drivers WHERE store_id = ? and active = ?", session["current_store_id"], "True")
+    drivers = db.execute("SELECT name FROM drivers WHERE store_id = ?", session["current_store_id"])
+    orders = db.execute("SELECT address, order_number FROM orders WHERE store_id = ?", session["current_store_id"])
+
+    if not request.method == "POST":
+        return render_template("index.html", active_drivers=active_drivers, drivers=drivers, orders=orders)
+
+    if request.method == "POST":
+
+        if request.form.get("activate") == "add":
+            db.execute("UPDATE drivers SET active = ? WHERE name = ? AND store_id = ?", "True", request.form.get("driver"), session["current_store_id"])
+            return redirect("/")
+
+        elif request.form.get("activate") == "remove":
+            db.execute("UPDATE drivers SET active = ? WHERE name = ? AND store_id = ?", "False", request.form.get("driver"), session["current_store_id"])
+            return redirect("/")
+
+        elif request.form.get("address_append") == "append":
+            if not request.form.get("address"):
+                return apology("Must enter an address", 400)
+
+            elif not request.form.get("order_num"):
+                return apology("Must enter an order number", 400)
+
+            db.execute("INSERT INTO order (address, order_number, store_id) VALUES (?, ?, ?)", request.form.get("address"), request.form.get("order_num"), session["store_id"])
+            return redirect("/")
+    
+    
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -157,7 +187,7 @@ def stores():
             return apology("must select your store number", 400)
     
         # Set session[current_store_id] as selected store and redirect to homepage
-        session["current_store_id"] = request.form.get("store_id")
+        session["current_store_id"] = request.form.get("current_store")
         return redirect("/")
 
 
@@ -175,9 +205,8 @@ def select_your_stores():
         return apology("Please select a store number", 400)
     
     # Update users table with new store_id
-    store = request.form.get("store")
-    session["current_store_id"] = store
-    db.execute("INSERT INTO employees (id, store_id) VALUES (?, ?)", session["user_id"], store)
+    session["current_store_id"] = request.form.get("store")
+    db.execute("INSERT INTO employees (id, store_id) VALUES (?, ?)", session["user_id"], session["current_store_id"])
 
     # If admin box checked prompt for passcode
     if request.form.get("admin") == "True":
@@ -188,6 +217,7 @@ def select_your_stores():
 
 @app.route("/admin", methods=["GET", "POST"])
 @login_required
+@store_required
 def admin():
     """verify admin privileges via store password and updates user table with admin credentials"""
 
@@ -218,21 +248,62 @@ def admin():
 
     
 
-@app.route("/employees", methods=["GET", "POST"])
+@app.route("/drivers", methods=["GET", "POST"])
 @login_required
-def employees():
+@store_required
+def drivers():
     """add or remove employee from database"""
 
     # Store a list of all drivers for the assoiciated store_id
-    drivers = db.execute("SELECT name FROM drivers dr JOIN stores st ON dr.store_id = st.store_id WHERE store_id = ?", session["current_store_id"])
-
+    drivers = db.execute("SELECT driver_id, name, store_id FROM drivers WHERE store_id = ?", session["current_store_id"])
+    admin = db.execute("SELECT admin From employees WHERE store_id = ? AND id = ?", session["current_store_id"], session["user_id"])
     if not request.method == "POST":
-        return render_template("employees.html", drivers=drivers)
+        return render_template("drivers.html", drivers=drivers)
+
+    # When page submit
+    if request.method == "POST":
+
+        # Emsure user has admin priveleges to append driver table
+        if admin[0]["admin"] != "True":
+            return apology("Admin Priveleges Required", 400)
+
+        else:
+
+            # If add driver button clicked
+            if request.form["app_driver"] == "add":
+
+                # Ensure driver name was submit
+                if not request.form.get("name"):
+                    return apology("Must submit name", 400)
+
+                # Ensure driver name was submit
+                if not request.form.get("id"):
+                    return apology("Must submit id", 400)
+
+                # Insert new row into drivers table with applicable data
+                db.execute("INSERT INTO drivers (driver_id, name, store_id) VALUES (?, ?, ?)", request.form.get("id"), request.form.get ("name"), session.get("current_store_id"))
+                return redirect("/drivers")
+
+                # If remove driver button clicked
+            if request.form["app_driver"] == "remove":
+
+                # Ensure driver name was submit
+                if not request.form.get("name"):
+                    return apology("Must submit name", 400)
+
+                # Ensure driver name was submit
+                if not request.form.get("name"):
+                    return apology("Must submit id", 400)
+            
+                # Remove any driver info from the drivers table matching submit form data
+                db.execute("DELETE FROM drivers WHERE driver_id = ? AND name = ?", request.form.get("id"), request.form.get("name"))
+                return redirect("drivers")
 
 
 
 @app.route("/history", methods=["GET", "POST"])
 @login_required
+@store_required
 def history():
     """shows table of dilivery history filterable by time passed"""
     return render_template("history.html")
