@@ -27,11 +27,18 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///deliv.db")
 
+class RowInfo:
+    def __init__(self, name, address, order_num):
+        self.name = name
+        self.address = address
+        self.order_num = order_num
+
+
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
-current_time = datetime.datetime.now()
+time = datetime.datetime.now()
 
 
 @app.after_request
@@ -51,33 +58,69 @@ def index():
 
     # Store a list of active drivers for the assoiciated store_id
     active_drivers = db.execute("SELECT name FROM drivers WHERE store_id = ? and active = ?", session["current_store_id"], "True")
+
+    # Store a list of all drivers for users store_id for select dropdown
     drivers = db.execute("SELECT name FROM drivers WHERE store_id = ?", session["current_store_id"])
-    orders = db.execute("SELECT address, order_number FROM orders WHERE store_id = ?", session["current_store_id"])
 
+    # Store a list of orders for the associated store_id
+    orders = db.execute("SELECT address, order_number FROM orders WHERE store_id = ? AND active = ?",  session["current_store_id"], "True")
+    print(orders)
+
+    # Render index template upon GET request
     if not request.method == "POST":
-        return render_template("index.html", active_drivers=active_drivers, drivers=drivers, orders=orders)
+        return render_template("index.html", active_drivers=active_drivers, orders=orders, drivers=drivers)
 
+    # When page is submit
     if request.method == "POST":
 
+        # If user clickes add driver button
         if request.form.get("activate") == "add":
+
+            # Update driver table to set selected driver active
             db.execute("UPDATE drivers SET active = ? WHERE name = ? AND store_id = ?", "True", request.form.get("driver"), session["current_store_id"])
             return redirect("/")
 
+        # If user clicked remove driver button
         elif request.form.get("activate") == "remove":
+
+            # Update driver table to set selected driver inactive
             db.execute("UPDATE drivers SET active = ? WHERE name = ? AND store_id = ?", "False", request.form.get("driver"), session["current_store_id"])
             return redirect("/")
 
+        # If user clicked add order button
         elif request.form.get("address_append") == "append":
+
+            # Ensure address form is not empty
             if not request.form.get("address"):
                 return apology("Must enter an address", 400)
 
+            # Ensure order # form is not empty
             elif not request.form.get("order_num"):
                 return apology("Must enter an order number", 400)
 
-            db.execute("INSERT INTO order (address, order_number, store_id) VALUES (?, ?, ?)", request.form.get("address"), request.form.get("order_num"), session["store_id"])
+            # Create new row in orders with relevant input data
+            db.execute("INSERT INTO orders (address, order_number, store_id, active) VALUES (?, ?, ?, ?)", request.form.get("address"), request.form.get("order_num"), session["current_store_id"], "True")
             return redirect("/")
     
-    
+        # If user clicked the remove order button 
+        elif request.form.get("address_append") == "remove":
+
+            # Ensure address form is not empty
+            if not request.form.get("address"):
+                return apology("Must enter an address", 400)
+
+            # Ensure order # form is not empty
+            elif not request.form.get("order_num"):
+                return apology("Must enter an order number", 400)
+
+            # Delete selected address/order# row from orders table
+            db.execute("DELETE FROM orders WHERE address = ? AND order_number = ? AND store_id = ?", request.form.get("address"), request.form.get("order_num"), session["current_store_id"])
+            return redirect("/")
+
+        # If user clicked the assign button
+        elif request.form.get("assign") == "assign":
+            return render_template("assigned.html")
+
 
 
 @app.route("/login", methods=["GET", "POST"])

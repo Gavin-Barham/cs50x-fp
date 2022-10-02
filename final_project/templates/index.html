@@ -10,18 +10,15 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th class="text-start">Driver</th>
-                    <th class="text-start">Address</th>
-                    <th class="text-end">Order Number</th>
+                    <th class="text-start">Drivers</th>
                 </tr>
             </thead>
             <tbody>
                 {% for row in active_drivers %}
                 <tr>
-                <td class="text-start">{{ row.name }}</td>
-                <td class="text-start">{{ row.store_id }}</td>
+                    <td class="text-start">{{ row.name }}</td>
                 </tr>
-                {% endfor %}
+                {% endfor %}        
             </tbody>
             <tfoot>
             </tfoot>
@@ -33,29 +30,41 @@
                     {% for row in drivers %}
                     <option value="{{ row.name }}">{{ row.name }}</option>
                     {% endfor %}
-                    {% for rows in orders %}
-                    <option value="{{ row.name }}">{{ row.name }}</option>
-                    <option value="{{ row.order_number }}">{{ row.order_number }}</option>
-                    {% endfor %}
-    
+                    
             </select>
             <p> </p>
             <button class="btn btn-primary" name=activate value="add" type="submit">Add Driver</button>
             <button class="btn btn-secondary" name=activate value="remove" type="submit">Remove Driver</button>    
-            <div class="container">
-                <div class="row">
-                    <div>
-                        <p> </p>
-                        <div class="form-group">
-                            <input id="address" placeholder="Address" type="text"></input>
-                            <input id="order_num" placeholder="Order Number" type="number" min="1"></input>
-                            <p> </p>
-                            <button class="btn btn-primary" name=address_append value="append" type="submit">Add Address/Order #</button>  
-                        </div>
-                    </div>
-                </div>
+            <p> </p>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="text-start">Address</th>
+                        <th class="text-end">Order Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in orders %}
+                    <tr>
+                        <td class="text-start">{{ row.address }}</td>
+                        <td class="text-end">{{ row.order_number }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                </tbody>
+                <tfoot>
+                </tfoot>
+            </table>
+            <div class="form-group">
+                <input id="address" name="address" placeholder="Address" type="text"></input>
+                <input id="order_num" name="order_num" placeholder="Order Number" type="number" min="1"></input>
+                <p> </p>
+                <button class="btn btn-primary" name=address_append value="append" type="submit">Add Order</button>
+                <button class="btn btn-secondary" name=address_append value="remove" type="submit">Remove Order</button>  
             </div>
         </div>
+        <p> </p>
+        <p> </p>
         <button class="btn btn-primary" name=assign value="assign" type="submit">Assign Orders</button> 
         
  
@@ -64,11 +73,15 @@
     </script>
     
     <script>// Create autocomplete
-
-        autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')), {
+function initMap() {
+    autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')), {
             types: ['address'],
             
-        });
+    })
+
+}
+
+        
     </script>
     
 
