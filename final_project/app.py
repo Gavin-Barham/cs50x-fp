@@ -38,7 +38,7 @@ class RowInfo:
 if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
-time = datetime.datetime.now()
+TIME = datetime.datetime.now()
 
 
 @app.after_request
@@ -57,14 +57,13 @@ def index():
     """assign driver to group of addresses with associated order number"""
 
     # Store a list of active drivers for the assoiciated store_id
-    active_drivers = db.execute("SELECT name FROM drivers WHERE store_id = ? and active = ?", session["current_store_id"], "True")
+    active_drivers = db.execute("SELECT name, time FROM drivers WHERE store_id = ? and active = ? ORDER BY time", session["current_store_id"], "True")
 
     # Store a list of all drivers for users store_id for select dropdown
     drivers = db.execute("SELECT name FROM drivers WHERE store_id = ?", session["current_store_id"])
 
     # Store a list of orders for the associated store_id
-    orders = db.execute("SELECT address, order_number FROM orders WHERE store_id = ? AND active = ?",  session["current_store_id"], "True")
-    print(orders)
+    orders = db.execute("SELECT address, order_number FROM orders WHERE store_id = ? AND active = ? ORDER BY order_number",  session["current_store_id"], "True")
 
     # Render index template upon GET request
     if not request.method == "POST":
@@ -76,8 +75,11 @@ def index():
         # If user clickes add driver button
         if request.form.get("activate") == "add":
 
+            # Get current time for orders table
+            time = datetime.datetime.now()
+
             # Update driver table to set selected driver active
-            db.execute("UPDATE drivers SET active = ? WHERE name = ? AND store_id = ?", "True", request.form.get("driver"), session["current_store_id"])
+            db.execute("UPDATE drivers SET active = ?, time = ? WHERE name = ? AND store_id = ?", "True", time, request.form.get("driver"), session["current_store_id"])
             return redirect("/")
 
         # If user clicked remove driver button
@@ -90,6 +92,9 @@ def index():
         # If user clicked add order button
         elif request.form.get("address_append") == "append":
 
+            # Get current time for orders table
+            time = datetime.datetime.now()
+
             # Ensure address form is not empty
             if not request.form.get("address"):
                 return apology("Must enter an address", 400)
@@ -99,7 +104,7 @@ def index():
                 return apology("Must enter an order number", 400)
 
             # Create new row in orders with relevant input data
-            db.execute("INSERT INTO orders (address, order_number, store_id, active) VALUES (?, ?, ?, ?)", request.form.get("address"), request.form.get("order_num"), session["current_store_id"], "True")
+            db.execute("INSERT INTO orders (address, order_number, store_id, active, time) VALUES (?, ?, ?, ?, ?)", request.form.get("address"), request.form.get("order_num"), session["current_store_id"], "True", time)
             return redirect("/")
     
         # If user clicked the remove order button 
@@ -114,7 +119,7 @@ def index():
                 return apology("Must enter an order number", 400)
 
             # Delete selected address/order# row from orders table
-            db.execute("DELETE FROM orders WHERE address = ? AND order_number = ? AND store_id = ?", request.form.get("address"), request.form.get("order_num"), session["current_store_id"])
+            db.execute("UPDATE orders SET active = ? WHERE address = ? AND order_number = ? AND store_id = ?", request.form.get("address"), request.form.get("order_num"), session["current_store_id"])
             return redirect("/")
 
         # If user clicked the assign button
@@ -176,15 +181,15 @@ def register():
     if not request.method == "POST":
         return render_template("register.html")
 
-    #  Ensure username was submitted
+    #  Ensure username input field is not empty
     if not request.form.get("username"):
         return apology("must provide username", 400)
 
-    # Ensure password was submit
+    # Ensure password input field is not empty
     elif not request.form.get("password"):
         return apology("must provide password", 400)
 
-    # Ensure confirmation password was submit
+    # Ensure confirmation password input field is not empty
     elif not request.form.get("confirmation"):
         return apology("must confirm password", 400)
 
@@ -244,6 +249,7 @@ def select_your_stores():
     if not request.method == "POST":
         return render_template("select_your_stores.html", stores=stores)
 
+    # Ensure store input field is not empty
     if not request.form.get("store"):
         return apology("Please select a store number", 400)
     
@@ -255,6 +261,7 @@ def select_your_stores():
     if request.form.get("admin") == "True":
         return redirect("/admin")
 
+    # Else redirect to stores page
     return redirect("/stores")
 
 
