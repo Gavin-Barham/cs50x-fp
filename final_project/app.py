@@ -181,28 +181,30 @@ def register():
     if not request.method == "POST":
         return render_template("register.html")
 
-    #  Ensure username input field is not empty
-    if not request.form.get("username"):
-        return apology("must provide username", 400)
+    if request.method == "POST":
 
-    # Ensure password input field is not empty
-    elif not request.form.get("password"):
-        return apology("must provide password", 400)
+        #  Ensure username input field is not empty
+        if not request.form.get("username"):
+            return apology("must provide username", 400)
 
-    # Ensure confirmation password input field is not empty
-    elif not request.form.get("confirmation"):
-        return apology("must confirm password", 400)
+        # Ensure password input field is not empty
+        elif not request.form.get("password"):
+            return apology("must provide password", 400)
 
-    # Ensure username doesnt already exist in DB
-    if db.execute("SELECT username FROM users WHERE username = ?", request.form.get("username").upper()):
-        return apology("username already exists", 400)
+        # Ensure confirmation password input field is not empty
+        elif not request.form.get("confirmation"):
+            return apology("must confirm password", 400)
 
-    # Ensure password and confirmation password match
-    if request.form.get("confirmation") == request.form.get("password"):
+        # Ensure username doesnt already exist in DB
+        if db.execute("SELECT username FROM users WHERE username = ?", request.form.get("username").upper()):
+            return apology("username already exists", 400)
 
-        # Insert new row into users table containing the filled forms data
-        db.execute("INSERT INTO users (id, username, hash) VALUES (?, ?, ?)", id(request.form.get("username")), request.form.get(
-            "username").upper(), generate_password_hash(request.form.get("password")))
+        # Ensure password and confirmation password match
+        if request.form.get("confirmation") == request.form.get("password"):
+
+            # Insert new row into users table containing the filled forms data
+            db.execute("INSERT INTO users (id, username, hash) VALUES (?, ?, ?)", id(request.form.get("username")), request.form.get(
+                "username").upper(), generate_password_hash(request.form.get("password")))
 
     else:
         return apology("passwords do not match")
