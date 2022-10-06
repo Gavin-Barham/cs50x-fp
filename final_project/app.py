@@ -29,8 +29,6 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///deliv.db")
 
-url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=40.6655101%2C-73.89188969999998&destinations=40.659569%2C-73.933783%7C40.729029%2C-73.851524%7C40.6860072%2C-73.6334271%7C40.598566%2C-73.7527626&key=YOUR_API_KEY"
-
 class Group:
     def __init__(self, name, address, order_num):
         self.name = name
@@ -59,6 +57,12 @@ def after_request(response):
 @store_required
 def index():
     """assign driver to group of addresses with associated order number"""
+
+    # Create partial url string variables to be combined for API request
+    url1 = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
+    url2 = "&destinations="
+    url3 = "&mode=car&key="
+    api_key = "AIzaSyDNgpkzEyuqSt0eWFsMrqgSHzN8nBh2oyQ" 
 
     # Store a list of active drivers for the assoiciated store_id
     active_drivers = db.execute("SELECT name, time FROM drivers WHERE store_id = ? and active = ? ORDER BY time", session["current_store_id"], "True")
@@ -94,7 +98,7 @@ def index():
             return redirect("/")
 
         # If user clicked add order button
-        elif request.form.get("address_append") == "append":
+        elif request.form.get("address_append") == "add":
 
             # Get current time for orders table
             time = datetime.datetime.now()
@@ -128,14 +132,14 @@ def index():
 
         # If user clicked the assign button
         elif request.form.get("assign") == "assign":
-            payload={}
-            headers = {}
 
-            response = requests.request("GET", url, headers=headers, data=payload)
+            origin = ""
+            destinations = ""
+            full_url = url1+origin+url2+destinations+url3+api_key
+            result = requests.get(full_url).json()
+            print(result["rows"])
 
-            print(response.text)
             return render_template("assigned.html")
-
 
 
 @app.route("/login", methods=["GET", "POST"])
