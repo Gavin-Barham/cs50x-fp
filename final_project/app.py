@@ -1,4 +1,6 @@
-from audioop import add
+import json
+import pprint as pp
+import requests
 import os
 import datetime
 from pickle import APPEND
@@ -27,7 +29,9 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///deliv.db")
 
-class RowInfo:
+url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=40.6655101%2C-73.89188969999998&destinations=40.659569%2C-73.933783%7C40.729029%2C-73.851524%7C40.6860072%2C-73.6334271%7C40.598566%2C-73.7527626&key=YOUR_API_KEY"
+
+class Group:
     def __init__(self, name, address, order_num):
         self.name = name
         self.address = address
@@ -124,6 +128,12 @@ def index():
 
         # If user clicked the assign button
         elif request.form.get("assign") == "assign":
+            payload={}
+            headers = {}
+
+            response = requests.request("GET", url, headers=headers, data=payload)
+
+            print(response.text)
             return render_template("assigned.html")
 
 
