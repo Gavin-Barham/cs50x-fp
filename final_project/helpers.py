@@ -46,3 +46,21 @@ def store_required(f):
             return redirect("/stores")
         return f(*args, **kwargs)
     return decorated_function
+
+def api_call(orders):
+    """
+    This functions calls the google distance matrix api and returns results 
+    """
+
+    # Create partial url string variables to be combined for API request
+    url1 = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
+    url2 = "&destinations="
+    url3 = "&mode=car&key="
+    api_key = "AIzaSyDNgpkzEyuqSt0eWFsMrqgSHzN8nBh2oyQ"
+    origin = orders[0]["address"]
+    destinations = ""
+    for i in range(1, len(orders)):
+        destinations += orders[i]["address"] + "|"
+        full_url = url1+origin+url2+destinations+url3+api_key
+        result = requests.get(full_url).json()
+    return(result)

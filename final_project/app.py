@@ -11,7 +11,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology, login_required, store_required
+from helpers import apology, login_required, store_required, api_call
 # Configure application
 app = Flask(__name__)
 
@@ -56,13 +56,7 @@ def after_request(response):
 @login_required
 @store_required
 def index():
-    """assign driver to group of addresses with associated order number"""
-
-    # Create partial url string variables to be combined for API request
-    url1 = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
-    url2 = "&destinations="
-    url3 = "&mode=car&key="
-    api_key = "AIzaSyDNgpkzEyuqSt0eWFsMrqgSHzN8nBh2oyQ" 
+    """assign driver to group of addresses with associated order number""" 
 
     # Store a list of active drivers for the assoiciated store_id
     active_drivers = db.execute("SELECT name, time FROM drivers WHERE store_id = ? and active = ? ORDER BY time", session["current_store_id"], "True")
@@ -133,13 +127,11 @@ def index():
         # If user clicked the assign button
         elif request.form.get("assign") == "assign":
 
-            origin = ""
-            destinations = ""
-            full_url = url1+origin+url2+destinations+url3+api_key
-            result = requests.get(full_url).json()
-            print(result["rows"])
+            result = api_call(orders)
+            print("results:", result["rows"])
+            print()
 
-            return render_template("assigned.html")
+            return render_template("assigned.html", result=result)
 
 
 @app.route("/login", methods=["GET", "POST"])
