@@ -1,4 +1,5 @@
 import json
+import pdb
 import pprint as pp
 import requests
 import os
@@ -127,11 +128,77 @@ def index():
         # If user clicked the assign button
         elif request.form.get("assign") == "assign":
 
-            result = api_call(orders)
-            print("results:", result["rows"])
-            print()
+            # Ensure all previous assignments set to inactive
+            db.execute("UPDATE assign SET active = ? WHERE store_id = ?", "False", session["current_store_id"])
 
-            return render_template("assigned.html", result=result)
+            # Perform assignment until either active_drivers or orders are empty
+            while active_drivers != None or orders != None:
+                
+                # Handle empty fields
+                if len(orders) == 0 or len(active_drivers) == 0:
+                    return redirect("/")
+
+                # Call API
+                results = api_call(orders)
+
+                # Ensure results arent empty
+                if results == None:
+
+                    # Get current time
+                    time = datetime.datetime.now()
+
+                    # If only one address left and a driver available assign next driver
+                    if len(orders) == 1 and len(active_drivers) >= 1:
+                        db.execute("INSERT INTO assign (name, address, order_number, store_id, time, active) VALUES (?, ?, ?, ?, ? ,?)", active_drivers[0]["name"], orders[0]["address"], orders[0]["order_number"], session["current_store_id"], time, "True")
+
+                        # Set order in orders to inactive
+                        db.execute("UPDATE orders SET active = ? WHERE order_number = ? AND store_id = ?", "False", orders[0]["order_number"], session["current_store_id"])
+
+                        # Set driver in drivers to inactive
+                        db.execute("UPDATE drivers SET active = ? WHERE name = ? AND store_id = ?", "False", active_drivers[0]["name"], session["current_store_id"])
+
+                        final_results = db.execute("SELECT * FROM assign WHERE store_id = ? AND active = ?", session["current_store_id"], "True")
+                        return render_template("assigned.html", final_results=final_results)
+
+                    final_results = db.execute("SELECT * FROM assign WHERE store_id = ? AND active = ?", session["current_store_id"], "True")
+                    return render_template("assigned.html", final_results=final_results)
+
+                # Get current time
+                time = datetime.datetime.now()
+
+                # Insert first driver name, and ["from"] address into assign table
+                db.execute("INSERT INTO assign (name, address, order_number, store_id, time, active) VALUES (?, ?, ?, ?, ?, ?)", active_drivers[0]["name"], orders[0]["address"], orders[0]["order_number"], session["current_store_id"], time, "True")
+                
+                # Set first order to inactive
+                db.execute("UPDATE orders SET active = ? WHERE order_number = ? and store_id = ?", "False", orders[0]["order_number"], session["current_store_id"])
+
+                # For each row in results
+                for j in range(len(results)):        
+                    # For each order
+                    for i in range(1, len(orders)):
+
+                        # If address appears in both results and orders
+                        if orders[i]["address"] == results[j]["to"]:
+
+                            # Insert assigned driver to corresponding deliveries
+                            db.execute("INSERT INTO assign (name, address, order_number, store_id, time, active) VALUES (?, ?, ?, ?, ?, ?)", active_drivers[0]["name"], orders[i]["address"], orders[i]["order_number"], session["current_store_id"], time, "True")
+
+                            # Set order in orders to inactive
+                            db.execute("UPDATE orders SET active = ? WHERE order_number = ? AND store_id = ?", "False", orders[i]["order_number"], session["current_store_id"])
+
+
+                # Set driver to inactive
+                db.execute("UPDATE drivers SET active = ? WHERE name = ? AND store_id = ?", "False", active_drivers[0]["name"], session["current_store_id"])
+
+                # Store a list of orders for the associated store_id
+                orders = db.execute("SELECT address, order_number FROM orders WHERE store_id = ? AND active = ? ORDER BY order_number",  session["current_store_id"], "True")
+
+                # Store a list of active drivers for the assoiciated store_id
+                active_drivers = db.execute("SELECT name, time FROM drivers WHERE store_id = ? and active = ? ORDER BY time", session["current_store_id"], "True")
+
+
+            final_results = db.execute("SELECT * FROM assign WHERE store_id = ? AND active = ?", session["current_store_id"], "True")
+            return render_template("assigned.html", final_results=final_results)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -364,4 +431,6 @@ def drivers():
 @store_required
 def history():
     """shows table of dilivery history filterable by time passed"""
-    return render_template("history.html")
+
+    history = db.execute("SELECT * FROM assign WHERE store_id = ?", session["current_store_id"])
+    return render_template("history.html", history=history)

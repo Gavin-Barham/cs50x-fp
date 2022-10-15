@@ -7,5 +7,24 @@
 {% block main %}
 <form action="/" method="post">
     <main class="container py-5 text-center">
-<p> TODO </p>
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr class="table table-dark">
+                    <td class="text-end">Driver</td>
+                    <td class="text-end">Order#</td>
+                    <td class="text-end">Address</td>
+                    <td class="text-end">Time</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in final_results %}
+                <tr>
+                    <td class="text-start">{{ row.name }}</td>
+                    <td class="text-end">{{ row.order_number }}</td>
+                    <td class="text-end">{{ row.address }}</td>
+                    <td class="text-end">{{ row.time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 {% endblock %}

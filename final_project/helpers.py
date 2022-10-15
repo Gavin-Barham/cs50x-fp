@@ -59,8 +59,42 @@ def api_call(orders):
     api_key = "AIzaSyDNgpkzEyuqSt0eWFsMrqgSHzN8nBh2oyQ"
     origin = orders[0]["address"]
     destinations = ""
+    MAX_TIME = 300
+        
+    # Dynamicaly set destinations
     for i in range(1, len(orders)):
-        destinations += orders[i]["address"] + "|"
-        full_url = url1+origin+url2+destinations+url3+api_key
-        result = requests.get(full_url).json()
-    return(result)
+            destinations += orders[i]["address"] + "|"
+
+    if destinations == "":
+        return
+
+    # Concatinate full URl and call API
+    full_url = url1+origin+url2+destinations+url3+api_key
+    result = requests.get(full_url).json()
+
+    # Format results for relevant information
+    to_return = []
+
+    try:
+        result = result['rows'][0]['elements']
+    except:
+        return
+
+    for i in range(1, len(orders)):
+        api_data = result[i-1]
+        time_in_seconds = api_data['duration']['value']
+
+        # Ensure only duration less than 5 minutes returned
+        if time_in_seconds <= MAX_TIME:
+            to_return.append({
+                'from': origin,
+                'to': orders[i]['address'],
+                'time_seconds': api_data['duration']['value'],
+                'distance_meters': api_data['distance']['value'],
+                'time_display_string': api_data['duration']['text'],
+                'distance_display_string': api_data['distance']['text'],
+            })
+
+    # Return a list of formatted data
+    return to_return
+
