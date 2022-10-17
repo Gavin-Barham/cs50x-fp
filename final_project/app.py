@@ -28,14 +28,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///https://storage.cloud.google.com/cs50-fp-deliv-app-bucket/deliv.db")
-
-class Group:
-    def __init__(self, name, address, order_num):
-        self.name = name
-        self.address = address
-        self.order_num = order_num
-
+db = SQL("sqlite:///.gitignore/deliv.db")
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
