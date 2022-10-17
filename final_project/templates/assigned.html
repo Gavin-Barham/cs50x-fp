@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Assignment Results
+{% endblock %}
+
+{% block main %}
+<form action="/" method="post">
+    <main class="container py-5 text-center">
+        <table class="table table-sm table-striped"">
+            <thead>
+                <tr>
+                    <td class="table-dark text-start">Driver</td>
+                    <td class="table-dark text-end">Order#</td>
+                    <td class="table-dark text-end">Address</td>
+                    <td class="table-dark text-end">Time</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in final_results %}
+                <tr>
+                    <td class="text-start">{{ row.name }}</td>
+                    <td class="text-end">{{ row.order_number }}</td>
+                    <td class="text-end">{{ row.address }}</td>
+                    <td class="text-end">{{ row.time }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+{% endblock %}

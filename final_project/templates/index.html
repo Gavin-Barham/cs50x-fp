@@ -5,27 +5,86 @@
 {% endblock %}
 
 {% block main %}
-<form action="/buy" method="post">
+<form action="/" method="post">
     <main class="container py-5 text-center">
-        <table class="table table-striped">
+        <table class="table table-sm table-bordered table-striped">
             <thead>
                 <tr>
-                    <th class="text-start">Driver</th>
-                    <th class="text-start">Address</th>
-                    <th class="text-end">Order #</th>
+                    <th class=" table-dark text-start"><span class="red">Drivers</span></th>
                 </tr>
             </thead>
             <tbody>
-                {% for name in employees %}
+                {% for row in active_drivers %}
                 <tr>
-                <td class="text-start">{{ name.name }}</td>
-                <td class="text-start">{{ name.name }}</td>
+                    <td class="table-secondary text-start">{{ row.name }}</td>
                 </tr>
-                {% endfor %}
+                {% endfor %}        
             </tbody>
             <tfoot>
             </tfoot>
         </table>
+        <div class="mb-3">
+            <select class="form-select mx-auto w-auto" name="driver">
+                <option disabled="" selected="">Drivers</option>
+    
+                    {% for row in drivers %}
+                    <option value="{{ row.name }}">{{ row.name }}</option>
+                    {% endfor %}
+                    
+            </select>
+            <p> </p>
+            <button class="btn btn-danger" name=activate value="add" type="submit">Add Driver</button>
+            <button class="btn btn-secondary" name=activate value="remove" type="submit">Remove Driver</button>    
+            <p> </p>
+            <table class="table table-sm table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th class="table-dark text-start"><a><span class="red">Address</span></a></th>
+                        <th class="table-dark text-end"><span class="red">Order #</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in orders %}
+                    <tr>
+                        <td class="table-secondary text-start">{{ row.address }}</td>
+                        <td class="table-secondary text-end">{{ row.order_number }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                </tbody>
+                <tfoot>
+                </tfoot>
+            </table>
+            <div class="form-group">
+                <input id="address" name="address" placeholder="Address" type="text"></input>
+                <input id="order_num" name="order_num" placeholder="Order Number" type="number" min="1" autocomplete="off"></input>
+                <p> </p>
+                <button class="btn btn-danger" name=address_append value="add" type="submit">Add Order</button>
+                <button class="btn btn-secondary" name=address_append value="remove" type="submit">Remove Order</button>  
+            </div>
+        </div>
+        <p> </p>
+        <p> </p>
+        <button class="btn btn-dark" name=assign value="assign" type="submit">Assign Orders</button> 
+        
+ 
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNgpkzEyuqSt0eWFsMrqgSHzN8nBh2oyQ&libraries=places&callback=initMap"></script>
+    </script>
+    
+    <script>// Create autocomplete
+function initMap() {
+    autocomplete = new google.maps.places.Autocomplete((document.getElementById('address')), {
+            types: ['address'],
+            
+    })
+
+}
+
+        
+    </script>
+    
+
     </main>
 </form>
 

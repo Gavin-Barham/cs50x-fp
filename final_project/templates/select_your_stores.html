@@ -1,27 +1,24 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Select Your Stores
+    My Stores
 {% endblock %}
 
 {% block main %}
 <form action="/select_your_stores" method="post">
     <div class="mb-3">
         <select class="form-select mx-auto w-auto" name="store">
-            <option disabled="" selected="">Stores</option>
+            <option disabled="" selected="">My Stores</option>
 
                 {% for rows in stores %}
                 <option value="{{ rows.store_id }}">{{ rows.store_id }}</option>
                 {% endfor %}
 
         </select>
-<<<<<<< HEAD
-=======
         <input type="checkbox" id="admin" name="admin" value="True">
         <label for="admin">Admin/AM/GM</label>
->>>>>>> test
     </div>
-    <button class="btn btn-primary" type="submit">Select</button>
+    <button class="btn btn-danger" type="submit">Select</button>
 </form>
 
 {% endblock %}

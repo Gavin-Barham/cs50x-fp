@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Stores
+    Current Store
 {% endblock %}
 
 {% block main %}
 <form action="/stores" method="post">
     <div class="mb-3">
         <select class="form-select mx-auto w-auto" name="current_store">
-            <option disabled="" selected="">Stores</option>
+            <option disabled="" selected="">Current Store</option>
 
                 {% for store in stores %}
                 <option value="{{ store.store_id }}">{{ store.store_id }}</option>
@@ -16,7 +16,7 @@
 
         </select>
     </div>
-    <button class="btn btn-primary" type="submit">Select</button>
+    <button class="btn btn-danger" type="submit">Select</button>
 </form>
 
 {% endblock %}
