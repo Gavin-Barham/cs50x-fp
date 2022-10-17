@@ -14,19 +14,23 @@
                 </tr>
             </thead>
             <tbody>
+                
                 {% for row in active_drivers %}
                 <tr>
                     <td class="table-secondary text-start">{{ row.name }}</td>
                 </tr>
-                {% endfor %}        
+                {% endfor %}
+
             </tbody>
         </table>
         <div class="mb-3">
             <select class="form-select mx-auto w-auto" name="driver">
                 <option disabled="" selected="">Drivers</option>
+
                     {% for row in drivers %}
-                <option value="{{ row.name }}">{{ row.name }}</option>
+                    <option value="{{ row.name }}">{{ row.name }}</option>
                     {% endfor %}
+
             </select>
             <p> </p>
             <button class="btn btn-danger" name=activate value="add" type="submit">Add Driver</button>
@@ -40,6 +44,7 @@
                     </tr>
                 </thead>
                 <tbody>
+
                     {% for row in orders %}
                     <tr>
                         <td class="table-secondary text-start">{{ row.address }}</td>
