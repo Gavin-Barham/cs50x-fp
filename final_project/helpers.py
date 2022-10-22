@@ -56,7 +56,7 @@ def api_call(orders):
     url1 = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
     url2 = "&destinations="
     url3 = "&mode=car&key="
-    api_key = "AIzaSyDNgpkzEyuqSt0eWFsMrqgSHzN8nBh2oyQ"
+    api_key = os.environ.get("API_KEY")
     origin = orders[0]["address"]
     destinations = ""
     MAX_TIME = 300
@@ -97,4 +97,3 @@ def api_call(orders):
 
     # Return a list of formatted data
     return to_return
-

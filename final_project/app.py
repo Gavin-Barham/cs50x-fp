@@ -28,7 +28,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///.gitignore/deliv.db")
+db = SQL("sqlite:///deliv.db")
 
 # Make sure API key is set
 if not os.environ.get("API_KEY"):
@@ -50,7 +50,7 @@ def after_request(response):
 @login_required
 @store_required
 def index():
-    """assign driver to group of addresses with associated order number""" 
+    """assign driver to group of addresses with associated order number"""
 
     # Store a list of active drivers for the assoiciated store_id
     active_drivers = db.execute("SELECT name, time FROM drivers WHERE store_id = ? and active = ? ORDER BY time", session["current_store_id"], "True")
