@@ -1,3 +1,8 @@
 .vscode/launch.json
 .vscode/settings.json
-flask_session
+final_project/__pycache__
+*/flask_session
+*/deliv.*
+*/data/*
+*DS*
+*/*.env

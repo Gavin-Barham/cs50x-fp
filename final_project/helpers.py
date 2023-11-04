@@ -1,9 +1,10 @@
-import os
+from dotenv import dotenv_values
 import requests
-import urllib.parse
 
-from flask import redirect, render_template, request, session
+from flask import redirect, render_template, session
 from functools import wraps
+
+ENVIRON = dotenv_values(".env")
 
 
 def apology(message, code=400):
@@ -34,6 +35,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def store_required(f):
     """
     Decorate routes to require login.
@@ -47,6 +49,7 @@ def store_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 def api_call(orders):
     """
     This functions calls the google distance matrix api and returns results 
@@ -56,14 +59,14 @@ def api_call(orders):
     url1 = "https://maps.googleapis.com/maps/api/distancematrix/json?origins="
     url2 = "&destinations="
     url3 = "&mode=car&key="
-    api_key = os.environ.get("API_KEY")
+    api_key = ENVIRON["API_KEY"]
     origin = orders[0]["address"]
     destinations = ""
     MAX_TIME = 300
-        
+
     # Dynamicaly set destinations
     for i in range(1, len(orders)):
-            destinations += orders[i]["address"] + "|"
+        destinations += orders[i]["address"] + "|"
 
     if destinations == "":
         return

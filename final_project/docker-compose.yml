@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: freaky_fast_delivery
+    platform: linux/x86_64
+    build: .
+    image: lucidlegend/freaky_fast_delivery
+    env_file: 
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    container_name: db
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - SQLITE:/data/
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:1.15-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    networks:
+      - app-network
+    depends_on:
+      - app
+    volumes:
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    networks:
+      - app-network
+
+
+volumes:
+  SQLITE:
+  data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
